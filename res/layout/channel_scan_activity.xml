@@ -17,75 +17,76 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#B000"
     android:orientation="vertical"
-    android:padding="15dp">
+    android:padding="15dp" >
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="15dp"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical" >
         <TextView
             android:id="@+id/textView3"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Keep Current List"
-            android:textAppearance="?android:attr/textAppearanceLarge"/>
+            android:textAppearance="?android:attr/textAppearanceLarge" />
         <ToggleButton
             android:id="@+id/toggleButtonKeepList"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="false"
             android:textOff="NO"
-            android:textOn="YES"/>
+            android:textOn="YES" />
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="15dp"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical" >
         <TextView
             android:id="@+id/textView33"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Tuner type"
-            android:textAppearance="?android:attr/textAppearanceLarge"/>
+            android:textAppearance="?android:attr/textAppearanceLarge" />
         <Spinner
             android:id="@+id/spinnerTunerType"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:entries="@array/spinner_tuner_type_entries"
-            android:spinnerMode="dropdown"/>
+            android:spinnerMode="dropdown" />
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="15dp"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical" >
         <TextView
             android:id="@+id/textView1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Auto Scan procedure"
-            android:textAppearance="?android:attr/textAppearanceLarge"/>
+            android:textAppearance="?android:attr/textAppearanceLarge" />
         <Button
             android:id="@+id/button1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="startAutoScan"
-            android:text="Start"/>
+            android:text="Start" />
     </LinearLayout>
     <TextView
         android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Manual Scan procedure"
-        android:textAppearance="?android:attr/textAppearanceLarge"/>
+        android:textAppearance="?android:attr/textAppearanceLarge" />
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content" >
         <EditText
             android:id="@+id/editTextFrequency"
             android:layout_width="0dp"
@@ -93,14 +94,38 @@
             android:layout_weight="1"
             android:ems="10"
             android:hint="Enter desired frequency"
-            android:inputType="number">
-            <requestFocus/>
+            android:inputType="number" >
+            <requestFocus />
         </EditText>
         <Button
             android:id="@+id/button2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="startManualScan"
-            android:text="Start"/>
+            android:text="Start" />
     </LinearLayout>
+    <Spinner
+        android:id="@+id/spinnerModulation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:entries="@array/spinner_modulation_entries"
+        android:spinnerMode="dropdown" />
+    <EditText
+        android:id="@+id/editTextSymbolRate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Enter desired symbol rate"
+        android:inputType="number"
+        android:visibility="gone" >
+    </EditText>
+    <EditText
+        android:id="@+id/editTextNetworkNumber"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Enter desired network number"
+        android:inputType="number"
+        android:visibility="gone" >
+    </EditText>
 </LinearLayout>

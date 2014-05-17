@@ -1,22 +1,17 @@
 /*
- * Copyright (C) 2014 iWedia S.A.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright (C) 2014 iWedia S.A. Licensed under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law
+ * or agreed to in writing, software distributed under the License is
+ * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
  */
 package com.iwedia.dtv;
 
-import android.content.Context;
-import android.widget.Toast;
+import android.os.RemoteException;
+import android.util.Log;
 
 import com.iwedia.dtv.dtvmanager.DTVManager;
 import com.iwedia.dtv.dtvmanager.IDTVManager;
@@ -30,13 +25,17 @@ import com.iwedia.dtv.route.common.RouteDecoderDescriptor;
 import com.iwedia.dtv.route.common.RouteInputOutputDescriptor;
 import com.iwedia.dtv.scan.IScanCallback;
 import com.iwedia.dtv.scan.IScanControl;
+import com.iwedia.dtv.scan.Modulation;
+import com.iwedia.dtv.scan.SignalInfo;
 import com.iwedia.dtv.scan.TunerType;
 import com.iwedia.dtv.service.IServiceCallback;
+import com.iwedia.dtv.service.IServiceControl;
 import com.iwedia.dtv.service.Service;
 import com.iwedia.dtv.service.ServiceDescriptor;
 import com.iwedia.dtv.service.SourceType;
 import com.iwedia.dtv.types.InternalException;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
 
 /**
@@ -45,35 +44,44 @@ import java.util.EnumSet;
 public class DVBManager {
     public static final String TAG = "DVBManager";
     /** DTV Service Intent Action. */
-    private Context mContext = null;
     private IDTVManager mDTVManager = null;
     /** Live routes */
-    private int mCurrentLiveRoute = 0;
-    private int mLiveRouteSat = 0;
-    private int mLiveRouteTer = 0;
-    private int mLiveRouteCab = 0;
-    private int mLiveRouteIp = 0;
+    private int mCurrentLiveRoute = -1;
+    private int mLiveRouteSat = -1;
+    private int mLiveRouteTer = -1;
+    private int mLiveRouteCab = -1;
+    private int mLiveRouteIp = -1;
     /** Install routes. */
-    private static int mCurrentInstallRoute = 0;
-    private int mInstallRouteIDTer = 0;
-    private int mInstallRouteIDCab = 0;
-    private int mInstallRouteIDSat = 0;
-    private int mInstallRouteIDIp = 0;
+    private static int mCurrentInstallRoute = -1;
+    private int mInstallRouteIDTer = -1;
+    private int mInstallRouteIDCab = -1;
+    private int mInstallRouteIDSat = -1;
+    private int mInstallRouteIDIp = -1;
     /** Currently active list in comedia. */
-    private int mCurrentListIndex = 0;
+    private final int CURRENT_LIST_INDEX = 0;
     /** Listener for service connection change. */
     private static boolean scanStarted = false;
     private static boolean autoScan = false;
+    private static boolean networkManualScan = false;
+    private static DVBManager mInstance;
+    private boolean ipAndSomeOtherTunerType = false;
 
-    public DVBManager(Context context) {
-        mContext = context;
+    public static DVBManager getInstance() {
+        if (mInstance == null) {
+            mInstance = new DVBManager();
+        }
+        return mInstance;
+    }
+
+    private DVBManager() {
         mDTVManager = new DTVManager();
+        initializeDTVService();
     }
 
     /**
      * Initialize Service.
      */
-    public void InitializeDTVService() {
+    private void initializeDTVService() {
         initializeRouteId();
     }
 
@@ -115,12 +123,12 @@ public class DVBManager {
             for (RouteFrontendType frontendType : frontendTypes) {
                 switch (frontendType) {
                     case SAT: {
-                        if (mLiveRouteSat == 0) {
+                        if (mLiveRouteSat == -1) {
                             mLiveRouteSat = getLiveRouteId(frontendDescriptor,
                                     demuxDescriptor, decoderDescriptor,
                                     outputDescriptor, broadcastRouteControl);
                         }
-                        if (mInstallRouteIDSat == 0) {
+                        if (mInstallRouteIDSat == -1) {
                             /**
                              * RETRIEVE INSTALL ROUTE ID SAT.
                              */
@@ -132,12 +140,12 @@ public class DVBManager {
                         break;
                     }
                     case CAB: {
-                        if (mLiveRouteCab == 0) {
+                        if (mLiveRouteCab == -1) {
                             mLiveRouteCab = getLiveRouteId(frontendDescriptor,
                                     demuxDescriptor, decoderDescriptor,
                                     outputDescriptor, broadcastRouteControl);
                         }
-                        if (mInstallRouteIDCab == 0) {
+                        if (mInstallRouteIDCab == -1) {
                             /**
                              * RETRIEVE INSTALL ROUTE ID CAB.
                              */
@@ -149,12 +157,12 @@ public class DVBManager {
                         break;
                     }
                     case TER: {
-                        if (mLiveRouteTer == 0) {
+                        if (mLiveRouteTer == -1) {
                             mLiveRouteTer = getLiveRouteId(frontendDescriptor,
                                     demuxDescriptor, decoderDescriptor,
                                     outputDescriptor, broadcastRouteControl);
                         }
-                        if (mInstallRouteIDTer == 0) {
+                        if (mInstallRouteIDTer == -1) {
                             /**
                              * RETRIEVE INSTALL ROUTE TER.
                              */
@@ -166,12 +174,12 @@ public class DVBManager {
                         break;
                     }
                     case IP: {
-                        if (mLiveRouteIp == 0) {
+                        if (mLiveRouteIp == -1) {
                             mLiveRouteIp = getLiveRouteId(frontendDescriptor,
                                     demuxDescriptor, decoderDescriptor,
                                     outputDescriptor, broadcastRouteControl);
                         }
-                        if (mInstallRouteIDIp == 0) {
+                        if (mInstallRouteIDIp == -1) {
                             /**
                              * RETRIEVE INSTALL ROUTE IP.
                              */
@@ -187,10 +195,15 @@ public class DVBManager {
                 }
             }
         }
+        if (mLiveRouteIp != -1
+                && (mLiveRouteCab != -1 || mLiveRouteSat != -1 || mLiveRouteTer != -1)) {
+            ipAndSomeOtherTunerType = true;
+        }
     }
 
     /**
      * Get Live Route From Descriptors.
+     * 
      * @param fDescriptor
      * @param mDemuxDescriptor
      * @param mDecoderDescriptor
@@ -208,6 +221,7 @@ public class DVBManager {
 
     /**
      * Start auto scan procedure.
+     * 
      * @param tunerType
      *        Type of tuner to scan channels.
      * @param keepCurrentList
@@ -218,7 +232,7 @@ public class DVBManager {
     public boolean autoScan(TunerType tunerType, boolean keepCurrentList)
             throws InternalException {
         int route = getActiveRouteByTunerType(tunerType);
-        if (route == 0) {
+        if (route == -1) {
             return false;
         }
         autoScan = true;
@@ -226,7 +240,8 @@ public class DVBManager {
         mCurrentInstallRoute = route;
         Service service = mDTVManager.getServiceControl().getActiveService(
                 mCurrentLiveRoute);
-        if (service.getServiceIndex() == -1) {
+        if (mCurrentLiveRoute == -1 || service.getServiceIndex() == -1
+                || scanStarted) {
             scanControl.autoScan(route);
             return true;
         } else {
@@ -238,6 +253,7 @@ public class DVBManager {
 
     /**
      * Start manual scan procedure.
+     * 
      * @param tunerType
      *        Type of tuner to scan channels.
      * @param frequency
@@ -250,16 +266,23 @@ public class DVBManager {
     public boolean manualScan(TunerType tunerType, int frequency,
             boolean keepCurrentList) throws InternalException {
         int route = getActiveRouteByTunerType(tunerType);
-        if (route == 0) {
+        if (route == -1) {
             return false;
         }
         autoScan = false;
         IScanControl scanControl = mDTVManager.getScanControl();
         mCurrentInstallRoute = route;
-        if (mCurrentLiveRoute == 0) {
+        Service service = mDTVManager.getServiceControl().getActiveService(
+                mCurrentLiveRoute);
+        if (mCurrentLiveRoute == -1 || service.getServiceIndex() == -1
+                || scanStarted) {
             scanControl.setFrequency(frequency);
             scanControl.appendList(keepCurrentList);
-            scanControl.manualScan(route);
+            if (networkManualScan) {
+                scanControl.manualNitScan(route);
+            } else {
+                scanControl.manualScan(route);
+            }
             return true;
         } else {
             scanStarted = true;
@@ -269,9 +292,79 @@ public class DVBManager {
     }
 
     /**
+     * Sets modulation.
+     * 
+     * @param modulation
+     *        Index of modulation option.
+     * @throws RemoteException
+     *         If connection error happens.
+     */
+    public void setModulation(int modulation) {
+        mDTVManager.getScanControl().setModulation(
+                Modulation.values()[modulation]);
+    }
+
+    /**
+     * Returns active modulation.
+     * 
+     * @throws RemoteException
+     */
+    public int getModulation() {
+        return mDTVManager.getScanControl().getModulation().ordinal();
+    }
+
+    /**
+     * Sets symbol rate.
+     * 
+     * @param symbolRate
+     *        Symbol rate to set.
+     * @throws RemoteException
+     *         If connection error happens.
+     */
+    public void setSymbolRate(int symbolRate) {
+        mDTVManager.getScanControl().setSymbolRate(symbolRate);
+    }
+
+    /**
+     * Returns active symbol rate.
+     * 
+     * @throws RemoteException
+     */
+    public int getSymbolRate() {
+        return (int) mDTVManager.getScanControl().getSymbolRate();
+    }
+
+    /**
+     * Sets network number.
+     * 
+     * @param networkNumber
+     *        Network number to set.
+     * @throws RemoteException
+     *         If connection error happens.
+     */
+    public void setNetworkNumber(int networkNumber) {
+        if (networkNumber > 0) {
+            networkManualScan = true;
+        } else {
+            networkManualScan = false;
+        }
+        mDTVManager.getScanControl().setNetworkNumber(networkNumber);
+    }
+
+    /**
+     * Returns active network number.
+     * 
+     * @throws RemoteException
+     */
+    public int getNetworkNumber() {
+        return mDTVManager.getScanControl().getNetworkNumber();
+    }
+
+    /**
      * Start MW video playback.
-     * @throws IllegalArgumentException
+     * 
      * @throws InternalException
+     * @throws IllegalArgumentException
      */
     public void startDTV(int channelNumber) throws IllegalArgumentException,
             InternalException {
@@ -279,53 +372,127 @@ public class DVBManager {
             throw new IllegalArgumentException("Illegal channel index!");
         }
         ServiceDescriptor desiredService = mDTVManager.getServiceControl()
-                .getServiceDescriptor(mCurrentListIndex, channelNumber);
+                .getServiceDescriptor(CURRENT_LIST_INDEX, channelNumber);
         int route = getActiveRouteByServiceType(desiredService.getSourceType());
-        if (route == 0) {
-            Toast.makeText(mContext, "Undefined channel type!",
-                    Toast.LENGTH_SHORT).show();
+        /** Wrong route */
+        if (route == -1 && mLiveRouteIp == -1) {
             return;
+        } else {
+            /** There is IP and DVB */
+            if (ipAndSomeOtherTunerType) {
+                desiredService = mDTVManager.getServiceControl()
+                        .getServiceDescriptor(CURRENT_LIST_INDEX,
+                                channelNumber + 1);
+                Log.d(TAG, "desiredService name " + desiredService.getName());
+                route = getActiveRouteByServiceType(desiredService
+                        .getSourceType());
+                int numberOfDtvChannels = getChannelListSize();
+                /** Regular DVB channel */
+                if (channelNumber < numberOfDtvChannels) {
+                    mCurrentLiveRoute = route;
+                    mDTVManager.getServiceControl().startService(route,
+                            CURRENT_LIST_INDEX, channelNumber + 1);
+                }
+            }
+            /** Only DVB */
+            else {
+                mCurrentLiveRoute = route;
+                mDTVManager.getServiceControl().startService(route,
+                        CURRENT_LIST_INDEX, channelNumber);
+            }
         }
-        mCurrentLiveRoute = route;
-        mDTVManager.getServiceControl().startService(route, mCurrentListIndex,
-                channelNumber);
     }
 
     /**
      * Stop MW video playback.
+     * 
      * @throws InternalException
      */
     public void stopDTV() throws InternalException {
-        ServiceDescriptor desiredService = mDTVManager.getServiceControl()
-                .getServiceDescriptor(mCurrentListIndex,
-                        getCurrentChannelNumber());
-        int route = getActiveRouteByServiceType(desiredService.getSourceType());
-        if (route == 0) {
-            Toast.makeText(mContext, "Undefined channel type!",
-                    Toast.LENGTH_SHORT).show();
-            return;
+        mDTVManager.getServiceControl().stopService(mCurrentLiveRoute);
+    }
+
+    /**
+     * Change Channel by Number.
+     * 
+     * @return Channel Info Object or null if error occurred.
+     * @throws IllegalArgumentException
+     * @throws InternalException
+     */
+    public void changeChannelByNumber(int channelNumber)
+            throws InternalException {
+        Log.d(TAG, "setChannel, channelNumber: " + channelNumber);
+        channelNumber = (channelNumber + getChannelListSize())
+                % getChannelListSize();
+        int numberOfDtvChannels = getChannelListSize();
+        /** For regular DVB channel */
+        if (channelNumber < numberOfDtvChannels) {
+            ServiceDescriptor desiredService = mDTVManager.getServiceControl()
+                    .getServiceDescriptor(
+                            CURRENT_LIST_INDEX,
+                            ipAndSomeOtherTunerType ? channelNumber + 1
+                                    : channelNumber);
+            // if (desiredService.isScrambled()) {
+            // return null;
+            // }
+            int route = getActiveRouteByServiceType(desiredService
+                    .getSourceType());
+            if (route == -1) {
+                return;
+            }
+            mCurrentLiveRoute = route;
+            mDTVManager.getServiceControl()
+                    .startService(
+                            route,
+                            CURRENT_LIST_INDEX,
+                            ipAndSomeOtherTunerType ? channelNumber + 1
+                                    : channelNumber);
         }
-        mDTVManager.getServiceControl().stopService(route);
     }
 
     /**
      * Get Current Channel Number.
      */
     public int getCurrentChannelNumber() {
-        return mDTVManager.getServiceControl()
-                .getActiveService(mCurrentLiveRoute).getServiceIndex();
+        return (int) (mDTVManager.getServiceControl().getActiveService(
+                mCurrentLiveRoute).getServiceIndex())
+                - (ipAndSomeOtherTunerType ? 1 : 0);
     }
 
     /**
      * Get Size of Channel List.
      */
     public int getChannelListSize() {
-        return mDTVManager.getServiceControl().getServiceListCount(
-                mCurrentListIndex);
+        int serviceCount = mDTVManager.getServiceControl().getServiceListCount(
+                CURRENT_LIST_INDEX);
+        if (ipAndSomeOtherTunerType) {
+            serviceCount--;
+        }
+        return serviceCount;
+    }
+
+    /**
+     * Get Channel Names.
+     */
+    public ArrayList<String> getChannelNames() {
+        ArrayList<String> channelNames = new ArrayList<String>();
+        String channelName = "";
+        int channelListSize = getChannelListSize();
+        IServiceControl serviceControl = mDTVManager.getServiceControl();
+        /** If there is IP first element in service list is DUMMY */
+        channelListSize = ipAndSomeOtherTunerType ? channelListSize + 1
+                : channelListSize;
+        for (int i = ipAndSomeOtherTunerType ? 1 : 0; i < channelListSize; i++) {
+            channelName = serviceControl.getServiceDescriptor(
+                    CURRENT_LIST_INDEX, i).getName();
+            channelNames.add(channelName);
+        }
+        return channelNames;
     }
 
     /**
      * Return route by tuner type.
+     * 
      * @param tunerType
      *        Tuner type to check.
      * @return Desired route, or 0 if service type is undefined.
@@ -334,7 +501,7 @@ public class DVBManager {
         IBroadcastRouteControl lBroadcastRouteControl = mDTVManager
                 .getBroadcastRouteControl();
         RouteInstallSettings lRouteInstallSettings = new RouteInstallSettings();
-        int lInstallRoute = 0;
+        int lInstallRoute = -1;
         switch (tunerType) {
             case SATTELITE: {
                 lRouteInstallSettings.setFrontendType(RouteFrontendType.SAT);
@@ -357,7 +524,7 @@ public class DVBManager {
                 break;
             }
             default:
-                return 0;
+                return -1;
         }
         lBroadcastRouteControl.configureInstallRoute(lInstallRoute,
                 lRouteInstallSettings);
@@ -366,6 +533,7 @@ public class DVBManager {
 
     /**
      * Return route by service type.
+     * 
      * @param serviceType
      *        Service type to check.
      * @return Desired route, or 0 if service type is undefined.
@@ -385,13 +553,13 @@ public class DVBManager {
                 return mLiveRouteIp;
             }
             default:
-                return 0;
+                return -1;
         }
     }
 
     /**
      * Abort started scan.
-     * @return True if everything is ok, false otherwise.
+     * 
      * @throws InternalException
      */
     public void abortScan() throws InternalException {
@@ -400,6 +568,7 @@ public class DVBManager {
 
     /**
      * Sets scan callback.
+     * 
      * @param channelCallback
      *        Scan callback object.
      */
@@ -410,12 +579,13 @@ public class DVBManager {
     /**
      * Remove callback.
      */
-    public void removeChannelCallback() {
-        mDTVManager.getServiceControl().unregisterCallback(null);
+    public void removeChannelCallback(IServiceCallback channelCallback) {
+        mDTVManager.getServiceControl().unregisterCallback(channelCallback);
     }
 
     /**
      * Sets scan callback.
+     * 
      * @param scanCallback
      *        Scan callback object.
      */
@@ -426,8 +596,21 @@ public class DVBManager {
     /**
      * Remove callback.
      */
-    public void removeScanCallback() {
-        mDTVManager.getScanControl().unregisterCallback(null);
+    public void removeScanCallback(IScanCallback scanCallback) {
+        mDTVManager.getScanControl().unregisterCallback(scanCallback);
+    }
+
+    public SignalInformation getServiceInfo() {
+        Service activeService = mDTVManager.getServiceControl()
+                .getActiveService(mCurrentLiveRoute);
+        ServiceDescriptor descriptor = mDTVManager.getServiceControl()
+                .getServiceDescriptor(CURRENT_LIST_INDEX,
+                        activeService.getServiceIndex());
+        SignalInfo signalInfo = mDTVManager.getScanControl().getSignalInfo(
+                mCurrentLiveRoute);
+        return new SignalInformation(descriptor.getName(),
+                descriptor.getONID(), signalInfo.getSignalQuality(),
+                signalInfo.getSignalStrenght(), 0);
     }
 
     public long getCurrentInstallRoute() {

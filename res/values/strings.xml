@@ -21,5 +21,20 @@
     <string name="title_activity_main">MainActivity</string>
     <string-array name="spinner_tuner_type_entries">
         <item>DVB-T</item>
+        <item>DVB-C</item>
+    </string-array>
+    <string-array name="spinner_modulation_entries">
+        <item>BPSK</item>
+        <item>QPSK</item>
+        <item>QAM4</item>
+        <item>8PSK</item>
+        <item>QAM16</item>
+        <item>QAM32</item>
+        <item>QAM64</item>
+        <item>QAM128</item>
+        <item>QAM256</item>
+        <item>AUTO</item>
+        <item>ANALOG</item>
+        <item>MAX</item>
     </string-array>
 </resources>

@@ -1,25 +1,22 @@
 /*
- * Copyright (C) 2014 iWedia S.A.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright (C) 2014 iWedia S.A. Licensed under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law
+ * or agreed to in writing, software distributed under the License is
+ * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
  */
 package com.iwedia.activities;
 
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.iwedia.adapters.ChannelListAdapter;
@@ -32,32 +29,28 @@ import java.util.ArrayList;
 
 public class ChannelProgressActivity extends DVBActivity {
     private static final int MESSAGE_CHANNEL_FOUND = 0,
-            MESSAGE_SCAN_FINISHED = 1;
+            MESSAGE_FREQUENCY_CHANGED = 2;
     /** For scanned channels. */
     private ListView mListViewChannels;
     private ChannelListAdapter mListAdapter;
     /** Progress bars for scan procedure. */
     private ProgressBar mProgressSignalStrength, mProgressSignalQuality,
             mProgressScan;
+    private TextView mTextViewFrequency;
     /** List of scanned channel names. */
     private ArrayList<String> mChannelNames;
     /** Handler for communication with UI thread from callback thread. */
     private Handler mUiHandler = new Handler() {
         public void handleMessage(android.os.Message msg) {
             switch (msg.what) {
-                case MESSAGE_CHANNEL_FOUND: {
-                    addChannelName((String) msg.obj);
+                case MESSAGE_FREQUENCY_CHANGED: {
+                    mTextViewFrequency.setText(String.valueOf(msg.obj));
                     break;
                 }
-                case MESSAGE_SCAN_FINISHED: {
-                    try {
-                        mDVBManager.startDTV(0);
-                    } catch (InternalException e) {
-                        e.printStackTrace();
-                    } catch (IllegalArgumentException e) {
-                        e.printStackTrace();
-                    }
-                    finish();
+                case MESSAGE_CHANNEL_FOUND: {
+                    Log.d("HANDLER", "\n\n\nMESSAGE_CHANNEL_FOUND"
+                            + (String) msg.obj);
+                    addChannelName((String) msg.obj);
                     break;
                 }
                 default:
@@ -79,6 +72,7 @@ public class ChannelProgressActivity extends DVBActivity {
 
         @Override
         public void installServiceRADIOName(int arg0, String arg1) {
+            Log.d("ChannelProgressActivity", "installServiceRADIOName " + arg1);
             mUiHandler.sendMessage(Message.obtain(mUiHandler,
                     MESSAGE_CHANNEL_FOUND, arg1));
         }
@@ -89,6 +83,7 @@ public class ChannelProgressActivity extends DVBActivity {
 
         @Override
         public void installServiceTVName(int arg0, String arg1) {
+            Log.d("ChannelProgressActivity", "installServiceTVName " + arg1);
             mUiHandler.sendMessage(Message.obtain(mUiHandler,
                     MESSAGE_CHANNEL_FOUND, arg1));
         }
@@ -107,8 +102,9 @@ public class ChannelProgressActivity extends DVBActivity {
 
         @Override
         public void scanFinished(int arg0) {
-            mUiHandler.sendMessage(Message.obtain(mUiHandler,
-                    MESSAGE_SCAN_FINISHED));
+            Log.d("ChannelProgressActivity",
+                    "\n\n\n-------------------------------scanFinished ");
+            finish();
         }
 
         @Override
@@ -121,7 +117,9 @@ public class ChannelProgressActivity extends DVBActivity {
         }
 
         @Override
-        public void scanTunFrequency(int arg0, int arg1) {
+        public void scanTunFrequency(int arg0, int frequency) {
+            Message.obtain(mUiHandler, MESSAGE_FREQUENCY_CHANGED, frequency)
+                    .sendToTarget();
         }
 
         @Override
@@ -155,6 +153,7 @@ public class ChannelProgressActivity extends DVBActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.channel_progress_activity);
+        mTextViewFrequency = (TextView) findViewById(R.id.textViewFrequency);
         /** Initialize list view. */
         mChannelNames = new ArrayList<String>();
         mListAdapter = new ChannelListAdapter(this, mChannelNames);
@@ -165,6 +164,12 @@ public class ChannelProgressActivity extends DVBActivity {
         mProgressSignalQuality = (ProgressBar) findViewById(R.id.progressBarSignalQuality);
         mProgressSignalStrength = (ProgressBar) findViewById(R.id.progressBarSignalStrength);
         mDVBManager.setScanCallback(mScanCallback);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mDVBManager.removeScanCallback(mScanCallback);
     }
 
     @Override
@@ -186,6 +191,7 @@ public class ChannelProgressActivity extends DVBActivity {
 
     /**
      * Add scanned item to list view.
+     * 
      * @param newChannelName
      *        Scanned channel name.
      */
