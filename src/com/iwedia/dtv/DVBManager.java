@@ -610,7 +610,7 @@ public class DVBManager {
                 mCurrentLiveRoute);
         return new SignalInformation(descriptor.getName(),
                 descriptor.getONID(), signalInfo.getSignalQuality(),
-                signalInfo.getSignalStrenght(), 0);
+                signalInfo.getSignalStrenght(), descriptor.getFrequency());
     }
 
     public long getCurrentInstallRoute() {

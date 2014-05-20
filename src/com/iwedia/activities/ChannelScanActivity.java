@@ -179,12 +179,6 @@ public class ChannelScanActivity extends DVBActivity {
                 }
             }
         });
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        scanStarted = false;
         mDVBManager.setChannelCallback(mChannelInstallCallback);
         try {
             mDVBManager.startDTV(0);
@@ -193,6 +187,12 @@ public class ChannelScanActivity extends DVBActivity {
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        scanStarted = false;
     }
 
     @Override

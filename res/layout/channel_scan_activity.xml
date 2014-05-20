@@ -87,7 +87,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
-        <EditText
+        <com.iwedia.view.EditTextWithDelete
             android:id="@+id/editTextFrequency"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -96,7 +96,7 @@
             android:hint="Enter desired frequency"
             android:inputType="number" >
             <requestFocus />
-        </EditText>
+        </com.iwedia.view.EditTextWithDelete>
         <Button
             android:id="@+id/button2"
             android:layout_width="wrap_content"
@@ -110,7 +110,7 @@
         android:layout_height="wrap_content"
         android:entries="@array/spinner_modulation_entries"
         android:spinnerMode="dropdown" />
-    <EditText
+    <com.iwedia.view.EditTextWithDelete
         android:id="@+id/editTextSymbolRate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -118,8 +118,8 @@
         android:hint="Enter desired symbol rate"
         android:inputType="number"
         android:visibility="gone" >
-    </EditText>
-    <EditText
+    </com.iwedia.view.EditTextWithDelete>
+    <com.iwedia.view.EditTextWithDelete
         android:id="@+id/editTextNetworkNumber"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -127,5 +127,5 @@
         android:hint="Enter desired network number"
         android:inputType="number"
         android:visibility="gone" >
-    </EditText>
+    </com.iwedia.view.EditTextWithDelete>
 </LinearLayout>
