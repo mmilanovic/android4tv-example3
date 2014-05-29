@@ -104,6 +104,13 @@ public class ChannelProgressActivity extends DVBActivity {
         public void scanFinished(int arg0) {
             Log.d("ChannelProgressActivity",
                     "\n\n\n-------------------------------scanFinished ");
+            try {
+                mDVBManager.startDTV(0);
+            } catch (InternalException e) {
+                e.printStackTrace();
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+            }
             finish();
         }
 
