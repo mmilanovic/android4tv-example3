@@ -51,10 +51,10 @@
                 android:textAppearance="?android:attr/textAppearanceLarge" />
         </LinearLayout>
         <TextView
-            android:id="@+id/textView1"
+            android:id="@+id/textViewQuality"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Signal Quality"
+            android:text="@string/quality"
             android:textAppearance="?android:attr/textAppearanceLarge" />
         <ProgressBar
             android:id="@+id/progressBarSignalQuality"
@@ -63,10 +63,10 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="15dp" />
         <TextView
-            android:id="@+id/textView2"
+            android:id="@+id/textViewStrength"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Signal Strength"
+            android:text="@string/strength"
             android:textAppearance="?android:attr/textAppearanceLarge" />
         <ProgressBar
             android:id="@+id/progressBarSignalStrength"
@@ -75,10 +75,10 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="15dp" />
         <TextView
-            android:id="@+id/textView3"
+            android:id="@+id/textViewProgress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Scan progress"
+            android:text="@string/progress"
             android:textAppearance="?android:attr/textAppearanceLarge" />
         <ProgressBar
             android:id="@+id/progressBarScanProgress"

@@ -29,14 +29,16 @@ import java.util.ArrayList;
 
 public class ChannelProgressActivity extends DVBActivity {
     private static final int MESSAGE_CHANNEL_FOUND = 0,
-            MESSAGE_FREQUENCY_CHANGED = 2;
+            MESSAGE_FREQUENCY_CHANGED = 2, MESSAGE_PROGRESS_CHANGED = 3,
+            MESSAGE_QUALITY_CHANGED = 4, MESSAGE_STRENGTH_CHANGED = 5;
     /** For scanned channels. */
     private ListView mListViewChannels;
     private ChannelListAdapter mListAdapter;
     /** Progress bars for scan procedure. */
     private ProgressBar mProgressSignalStrength, mProgressSignalQuality,
             mProgressScan;
-    private TextView mTextViewFrequency;
+    private TextView mTextViewFrequency, mTextViewProgress, mTextViewStrength,
+            mTextViewQuality;
     /** List of scanned channel names. */
     private ArrayList<String> mChannelNames;
     /** Handler for communication with UI thread from callback thread. */
@@ -51,6 +53,24 @@ public class ChannelProgressActivity extends DVBActivity {
                     Log.d("HANDLER", "\n\n\nMESSAGE_CHANNEL_FOUND"
                             + (String) msg.obj);
                     addChannelName((String) msg.obj);
+                    break;
+                }
+                case MESSAGE_PROGRESS_CHANGED: {
+                    mProgressScan.setProgress((Integer) msg.obj);
+                    mTextViewProgress.setText(getString(R.string.progress, ""
+                            + (Integer) msg.obj));
+                    break;
+                }
+                case MESSAGE_STRENGTH_CHANGED: {
+                    mProgressSignalStrength.setProgress((Integer) msg.obj);
+                    mTextViewStrength.setText(getString(R.string.strength, ""
+                            + (Integer) msg.obj));
+                    break;
+                }
+                case MESSAGE_QUALITY_CHANGED: {
+                    mProgressSignalQuality.setProgress((Integer) msg.obj);
+                    mTextViewQuality.setText(getString(R.string.quality, ""
+                            + (Integer) msg.obj));
                     break;
                 }
                 default:
@@ -120,7 +140,8 @@ public class ChannelProgressActivity extends DVBActivity {
 
         @Override
         public void scanProgressChanged(int arg0, int arg1) {
-            mProgressScan.setProgress(arg1);
+            Message.obtain(mUiHandler, MESSAGE_PROGRESS_CHANGED, arg1)
+                    .sendToTarget();
         }
 
         @Override
@@ -135,12 +156,14 @@ public class ChannelProgressActivity extends DVBActivity {
 
         @Override
         public void signalQuality(int arg0, int arg1) {
-            mProgressSignalQuality.setProgress(arg1);
+            Message.obtain(mUiHandler, MESSAGE_QUALITY_CHANGED, arg1)
+                    .sendToTarget();
         }
 
         @Override
         public void signalStrength(int arg0, int arg1) {
-            mProgressSignalStrength.setProgress(arg1);
+            Message.obtain(mUiHandler, MESSAGE_STRENGTH_CHANGED, arg1)
+                    .sendToTarget();
         }
 
         @Override
@@ -161,6 +184,12 @@ public class ChannelProgressActivity extends DVBActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.channel_progress_activity);
         mTextViewFrequency = (TextView) findViewById(R.id.textViewFrequency);
+        mTextViewProgress = (TextView) findViewById(R.id.textViewProgress);
+        mTextViewStrength = (TextView) findViewById(R.id.textViewStrength);
+        mTextViewQuality = (TextView) findViewById(R.id.textViewQuality);
+        mTextViewProgress.setText(getString(R.string.progress, "0"));
+        mTextViewStrength.setText(getString(R.string.strength, "0"));
+        mTextViewQuality.setText(getString(R.string.quality, "0"));
         /** Initialize list view. */
         mChannelNames = new ArrayList<String>();
         mListAdapter = new ChannelListAdapter(this, mChannelNames);

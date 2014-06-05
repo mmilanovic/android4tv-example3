@@ -19,6 +19,9 @@
     <string name="hello_world">Hello world!</string>
     <string name="menu_settings">Settings</string>
     <string name="title_activity_main">MainActivity</string>
+    <string name="progress">Scan progress: %1$s%%</string>
+    <string name="strength">Signal strength: %1$s%%</string>
+    <string name="quality">Signal quality: %1$s%%</string>
     <string-array name="spinner_tuner_type_entries">
         <item>DVB-T</item>
         <item>DVB-C</item>
