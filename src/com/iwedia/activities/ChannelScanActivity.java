@@ -15,13 +15,16 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.PopupMenu.OnMenuItemClickListener;
 import android.widget.EditText;
+import android.widget.PopupMenu;
 import android.widget.Spinner;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -36,13 +39,15 @@ import com.iwedia.scan.R;
 /**
  * Class that starts scan procedure (auto or manual).
  */
-public class ChannelScanActivity extends DVBActivity {
+public class ChannelScanActivity extends DVBActivity implements
+        OnMenuItemClickListener {
     private final static String TAG = "ChannelScanActivity";
     private EditText mManualScanFrequencyEditText, mSymbolRateEditText,
             mNetworkNumberEditText;
     private ToggleButton mKeepCurrentListButton;
     private Spinner mTunerTypeSpinner, mModulationSpinner;
     private boolean scanStarted = false;
+    private PopupMenu mPopup;
     /**
      * Callback for channels.
      */
@@ -206,15 +211,24 @@ public class ChannelScanActivity extends DVBActivity {
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main, menu);
-        return true;
+    /** Listener for menu button click */
+    public void onClickMenu(View v) {
+        // openOptionsMenu();
+        if (v == null) {
+            v = findViewById(R.id.menu_view);
+        }
+        // create popup menu
+        if (mPopup == null) {
+            mPopup = new PopupMenu(this, v);
+            mPopup.setOnMenuItemClickListener(this);
+            MenuInflater inflater = mPopup.getMenuInflater();
+            inflater.inflate(R.menu.main, mPopup.getMenu());
+        }
+        mPopup.show();
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onMenuItemClick(final MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.menu_channel_info: {
@@ -222,8 +236,17 @@ public class ChannelScanActivity extends DVBActivity {
                 return true;
             }
             default:
-                return super.onOptionsItemSelected(item);
+                return false;
         }
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_MENU) {
+            onClickMenu(null);
+            return true;
+        }
+        return super.onKeyUp(keyCode, event);
     }
 
     /**
