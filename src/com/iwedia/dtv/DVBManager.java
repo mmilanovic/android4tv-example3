@@ -361,6 +361,49 @@ public class DVBManager {
     }
 
     /**
+     * Start MW video playback.
+     * 
+     * @throws InternalException
+     * @throws IllegalArgumentException
+     */
+    public void startDTV(int channelNumber) throws IllegalArgumentException,
+            InternalException {
+        if (channelNumber < 0 || channelNumber >= getChannelListSize()) {
+            throw new IllegalArgumentException("Illegal channel index!");
+        }
+        ServiceDescriptor desiredService = mDTVManager.getServiceControl()
+                .getServiceDescriptor(CURRENT_LIST_INDEX, channelNumber);
+        int route = getActiveRouteByServiceType(desiredService.getSourceType());
+        /** Wrong route */
+        if (route == -1 && mLiveRouteIp == -1) {
+            return;
+        } else {
+            /** There is IP and DVB */
+            if (ipAndSomeOtherTunerType) {
+                desiredService = mDTVManager.getServiceControl()
+                        .getServiceDescriptor(CURRENT_LIST_INDEX,
+                                channelNumber + 1);
+                Log.d(TAG, "desiredService name " + desiredService.getName());
+                route = getActiveRouteByServiceType(desiredService
+                        .getSourceType());
+                int numberOfDtvChannels = getChannelListSize();
+                /** Regular DVB channel */
+                if (channelNumber < numberOfDtvChannels) {
+                    mCurrentLiveRoute = route;
+                    mDTVManager.getServiceControl().startService(route,
+                            CURRENT_LIST_INDEX, channelNumber + 1);
+                }
+            }
+            /** Only DVB */
+            else {
+                mCurrentLiveRoute = route;
+                mDTVManager.getServiceControl().startService(route,
+                        CURRENT_LIST_INDEX, channelNumber);
+            }
+        }
+    }
+
+    /**
      * Stop MW video playback.
      * 
      * @throws InternalException
@@ -389,9 +432,6 @@ public class DVBManager {
                             CURRENT_LIST_INDEX,
                             ipAndSomeOtherTunerType ? channelNumber + 1
                                     : channelNumber);
-            // if (desiredService.isScrambled()) {
-            // return null;
-            // }
             int route = getActiveRouteByServiceType(desiredService
                     .getSourceType());
             if (route == -1) {

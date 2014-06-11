@@ -181,7 +181,7 @@ public class ChannelScanActivity extends DVBActivity {
         });
         mDVBManager.setChannelCallback(mChannelInstallCallback);
         try {
-            mDVBManager.changeChannelByNumber(0);
+            mDVBManager.startDTV(0);
         } catch (InternalException e) {
             e.printStackTrace();
         } catch (IllegalArgumentException e) {
