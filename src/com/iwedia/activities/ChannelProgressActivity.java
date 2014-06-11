@@ -125,7 +125,7 @@ public class ChannelProgressActivity extends DVBActivity {
             Log.d("ChannelProgressActivity",
                     "\n\n\n-------------------------------scanFinished ");
             try {
-                mDVBManager.startDTV(0);
+                mDVBManager.changeChannelByNumber(0);
             } catch (InternalException e) {
                 e.printStackTrace();
             } catch (IllegalArgumentException e) {
