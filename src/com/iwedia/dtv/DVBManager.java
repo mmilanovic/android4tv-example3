@@ -422,11 +422,13 @@ public class DVBManager {
     public void changeChannelByNumber(int channelNumber)
             throws InternalException {
         Log.d(TAG, "setChannel, channelNumber: " + channelNumber);
-        channelNumber = (channelNumber + getChannelListSize())
-                % getChannelListSize();
-        int numberOfDtvChannels = getChannelListSize();
+        int listSize = getChannelListSize();
+        if (listSize == 0) {
+            return;
+        }
+        channelNumber = (channelNumber + listSize) % listSize;
         /** For regular DVB channel */
-        if (channelNumber < numberOfDtvChannels) {
+        if (channelNumber < listSize) {
             ServiceDescriptor desiredService = mDTVManager.getServiceControl()
                     .getServiceDescriptor(
                             CURRENT_LIST_INDEX,
