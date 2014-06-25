@@ -19,6 +19,15 @@
     <string name="hello_world">Hello world!</string>
     <string name="menu_settings">Settings</string>
     <string name="title_activity_main">MainActivity</string>
+    <string name="frequency">Frequency:</string>
+    <string name="keep_list">Keep Current List</string>
+    <string name="tuner_type">Tuner type</string>
+    <string name="auto_scan">Auto Scan procedure</string>
+    <string name="start">Start</string>
+    <string name="manual_scan">Manual Scan procedure</string>
+    <string name="enter_freq">Enter desired frequency</string>
+    <string name="enter_simbol_rate">Enter desired symbol rate</string>
+    <string name="enter_network_number">Enter desired network number</string>
     <string name="progress">Scan progress: %1$s%%</string>
     <string name="strength">Signal strength: %1$s%%</string>
     <string name="quality">Signal quality: %1$s%%</string>
