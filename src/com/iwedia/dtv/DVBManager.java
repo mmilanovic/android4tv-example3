@@ -33,6 +33,7 @@ import com.iwedia.dtv.service.IServiceControl;
 import com.iwedia.dtv.service.Service;
 import com.iwedia.dtv.service.ServiceDescriptor;
 import com.iwedia.dtv.service.SourceType;
+import com.iwedia.dtv.swupdate.SWVersionType;
 import com.iwedia.dtv.types.InternalException;
 
 import java.util.ArrayList;
@@ -554,6 +555,10 @@ public class DVBManager {
             default:
                 return -1;
         }
+    }
+
+    public String getSwVersion(SWVersionType type) {
+        return mDTVManager.getSoftwareUpdateControl().getSWVersion(type);
     }
 
     /**

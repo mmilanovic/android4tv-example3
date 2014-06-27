@@ -11,10 +11,12 @@
 package com.iwedia.activities;
 
 import android.content.Intent;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -233,6 +235,13 @@ public class ChannelScanActivity extends DVBActivity implements
         switch (item.getItemId()) {
             case R.id.menu_channel_info: {
                 startActivity(new Intent(this, ChannelInfoActivity.class));
+                return true;
+            }
+            case R.id.menu_version: {
+                Display display = getWindowManager().getDefaultDisplay();
+                Point size = new Point();
+                display.getSize(size);
+                new SoftwareVersionDialog(this, size.x, size.y).show();
                 return true;
             }
             default:

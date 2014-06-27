@@ -31,6 +31,11 @@
     <string name="progress">Scan progress: %1$s%%</string>
     <string name="strength">Signal strength: %1$s%%</string>
     <string name="quality">Signal quality: %1$s%%</string>
+    <string name="sw_version">Software version</string>
+    <string name="app_version">Application version:</string>
+    <string name="framework_version">Framework version:</string>
+    <string name="middleware_version">Middleware version:</string>
+    <string name="sdk_version">SDK version:</string>
     <string-array name="spinner_tuner_type_entries">
         <item>DVB-T</item>
         <item>DVB-C</item>
