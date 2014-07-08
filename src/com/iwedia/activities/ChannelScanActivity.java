@@ -274,6 +274,7 @@ public class ChannelScanActivity extends DVBActivity implements
                             ChannelProgressActivity.class);
                     startActivity(intent);
                     scanStarted = true;
+                    DVBManager.setScanStarted(false);
                 }
             }
         } catch (InternalException e) {
@@ -307,6 +308,7 @@ public class ChannelScanActivity extends DVBActivity implements
                                 ChannelProgressActivity.class);
                         startActivity(intent);
                         scanStarted = true;
+                        DVBManager.setScanStarted(false);
                     }
                 }
             } catch (NumberFormatException e) {
