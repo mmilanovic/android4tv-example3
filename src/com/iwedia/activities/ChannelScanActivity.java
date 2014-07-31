@@ -200,6 +200,8 @@ public class ChannelScanActivity extends DVBActivity implements
     protected void onResume() {
         super.onResume();
         scanStarted = false;
+        findViewById(R.id.buttonAuto).setEnabled(true);
+        findViewById(R.id.buttonManual).setEnabled(true);
     }
 
     @Override
@@ -266,6 +268,8 @@ public class ChannelScanActivity extends DVBActivity implements
         if (tunerType == null) {
             return;
         }
+        findViewById(R.id.buttonAuto).setEnabled(false);
+        findViewById(R.id.buttonManual).setEnabled(false);
         try {
             if (mDVBManager.autoScan(tunerType,
                     mKeepCurrentListButton.isChecked())) {
@@ -295,6 +299,8 @@ public class ChannelScanActivity extends DVBActivity implements
             if (frontendType == null) {
                 return;
             }
+            findViewById(R.id.buttonAuto).setEnabled(false);
+            findViewById(R.id.buttonManual).setEnabled(false);
             try {
                 if (convertSpinnerChoiceToFrontendType() == TunerType.CABLE) {
                     mDVBManager.setModulation(mModulationSpinner

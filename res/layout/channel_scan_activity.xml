@@ -78,7 +78,7 @@
             android:text="@string/auto_scan"
             android:textAppearance="?android:attr/textAppearanceLarge" />
         <Button
-            android:id="@+id/button1"
+            android:id="@+id/buttonAuto"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="startAutoScan"
@@ -104,7 +104,7 @@
             <requestFocus />
         </com.iwedia.view.EditTextWithDelete>
         <Button
-            android:id="@+id/button2"
+            android:id="@+id/buttonManual"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="startManualScan"
